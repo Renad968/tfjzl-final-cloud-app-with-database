@@ -11,8 +11,8 @@
 
 <body>
     <!-- Navigation bar -->
-    <nav class="navbar navbar-light bg-light">
-        <div class="container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <div class="container">
             <div class="navbar-header">
                   <a class="navbar-brand" href="{% url 'onlinecourse:index' %}">Home</a>
             </div>
@@ -40,13 +40,14 @@
     </nav>
 
     <!-- Page content -->
-    <div class="container-fluid">
-            <h2>{{ course.name }}</h2>
-            <div class="card-columns-vertical">
+    <main class="container py-4">
+            <h1 class="display-4 mb-4">{{ course.name }}</h1>
+            <div class="row">
                 {% for lesson in course.lesson_set.all %}
-                    <div class="card mt-1">
-                        <div class="card-header"><h5>Lesson {{lesson.order|add:1}}: {{lesson.title}}</h5></div>
+                    <div class="col-12"><div class="card border-primary shadow-sm mb-3">
+                        <div class="card-header bg-primary text-white"><h5 class="mb-0">Lesson {{lesson.order|add:1}}: {{lesson.title}}</h5></div>
                         <div class="card-body">{{lesson.content}}</div>
+                    </div>
                     </div>
                 {% endfor %}
             </div>
@@ -60,8 +61,8 @@
                 <form method="post" action="{% url 'onlinecourse:submit' course.id %}">
                     {% csrf_token %}
                     {% for question in course.question_set.all %}
-                        <div class="card mb-3">
-                            <div class="card-header">
+                        <div class="card border-secondary shadow-sm mb-3">
+                            <div class="card-header bg-light">
                                 <strong>{{ question.question_text }}</strong>
                                 <span class="badge badge-secondary">
                                     {{ question.grade }} points
@@ -88,6 +89,6 @@
                 </form>
             </div>
             {% endif %}
-    </div>
+    </main>
 </body>
 </html>
