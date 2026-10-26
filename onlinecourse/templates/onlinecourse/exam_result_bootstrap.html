@@ -54,7 +54,7 @@
             {% for result in question_results %}
             <div class="card mb-3">
                 <div class="card-header">
-                    <strong>{{ result.question.content }}</strong>
+                    <strong>{{ result.question.question_text }}</strong>
                     <span class="badge badge-secondary">{{ result.question.grade }} points</span>
                 </div>
                 <div class="card-body">
@@ -67,7 +67,7 @@
                     <ul>
                         {% for choice in result.selected_choices %}
                             <li class="{% if choice.is_correct %}text-success{% else %}text-danger{% endif %}">
-                                {{ choice.content }}
+                                {{ choice.choice_text }}
                             </li>
                         {% empty %}
                             <li>No choice selected</li>
@@ -76,7 +76,7 @@
                     <p>Correct answer(s):</p>
                     <ul>
                         {% for choice in result.correct_choices %}
-                            <li class="text-success">{{ choice.content }}</li>
+                            <li class="text-success">{{ choice.choice_text }}</li>
                         {% endfor %}
                     </ul>
                 </div>

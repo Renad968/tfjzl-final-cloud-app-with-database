@@ -62,7 +62,7 @@
                     {% for question in course.question_set.all %}
                         <div class="card mb-3">
                             <div class="card-header">
-                                <strong>{{ question.content }}</strong>
+                                <strong>{{ question.question_text }}</strong>
                                 <span class="badge badge-secondary">
                                     {{ question.grade }} points
                                 </span>
@@ -77,7 +77,7 @@
                                                id="choice-{{ choice.id }}">
                                         <label class="form-check-label"
                                                for="choice-{{ choice.id }}">
-                                            {{ choice.content }}
+                                            {{ choice.choice_text }}
                                         </label>
                                     </div>
                                 {% endfor %}
