@@ -222,7 +222,7 @@ def show_exam_result(request, course_id, submission_id):
         )
         correct_ids = {choice.id for choice in correct_choices}
         selected_question_ids = {choice.id for choice in selected_choices}
-        is_correct = bool(correct_ids) and correct_ids == selected_question_ids
+        is_correct = question.is_get_score(selected_ids) and correct_ids == selected_question_ids
 
         total_grade += question.grade
         if is_correct:
@@ -239,6 +239,7 @@ def show_exam_result(request, course_id, submission_id):
     context = {
         "course": course,
         "submission": submission,
+        "selected_ids": selected_ids,
         "grade": grade,
         "score": score,
         "total_grade": total_grade,
