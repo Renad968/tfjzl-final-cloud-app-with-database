@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 # <HINT> Import any new Models here
-from .models import Course, Enrollment
+from .models import Course, Enrollment, Question, Choice, Submission
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
@@ -134,3 +134,116 @@ def extract_answers(request):
 
 
 
+
+def extract_answers(request):
+    selected_ids = []
+    for key in request.POST:
+        if key.startswith("choice"):
+            selected_ids.extend(request.POST.getlist(key))
+    return [int(choice_id) for choice_id in selected_ids if choice_id.isdigit()]
+
+
+def submit(request, course_id):
+    if not request.user.is_authenticated:
+        return redirect("onlinecourse:login")
+
+    course = get_object_or_404(Course, pk=course_id)
+    enrollment = get_object_or_404(
+        Enrollment, user=request.user, course=course
+    )
+    submission = Submission.objects.create(enrollment=enrollment)
+
+    for choice_id in extract_answers(request):
+        choice = get_object_or_404(
+            Choice, pk=choice_id, question__course=course
+        )
+        submission.choices.add(choice)
+
+    return redirect(
+        "onlinecourse:show_exam_result",
+        course_id=course.id,
+        submission_id=submission.id,
+    )
+
+def extract_answers(request):
+    selected_ids = []
+    for key in request.POST:
+        if key.startswith("choice"):
+            selected_ids.extend(request.POST.getlist(key))
+    return [int(choice_id) for choice_id in selected_ids if choice_id.isdigit()]
+
+
+def submit(request, course_id):
+    if not request.user.is_authenticated:
+        return redirect("onlinecourse:login")
+
+    course = get_object_or_404(Course, pk=course_id)
+    enrollment = get_object_or_404(
+        Enrollment, user=request.user, course=course
+    )
+    submission = Submission.objects.create(enrollment=enrollment)
+
+    for choice_id in extract_answers(request):
+        choice = get_object_or_404(
+            Choice, pk=choice_id, question__course=course
+        )
+        submission.choices.add(choice)
+
+    return redirect(
+        "onlinecourse:show_exam_result",
+        course_id=course.id,
+        submission_id=submission.id,
+    )
+
+
+def show_exam_result(request, course_id, submission_id):
+    if not request.user.is_authenticated:
+        return redirect("onlinecourse:login")
+
+    course = get_object_or_404(Course, pk=course_id)
+    submission = get_object_or_404(
+        Submission,
+        pk=submission_id,
+        enrollment__course=course,
+        enrollment__user=request.user,
+    )
+
+    selected_ids = set(submission.choices.values_list("id", flat=True))
+    question_results = []
+    score = 0
+    total_grade = 0
+
+    for question in course.question_set.all():
+        correct_choices = list(
+            question.choice_set.filter(is_correct=True)
+        )
+        selected_choices = list(
+            question.choice_set.filter(id__in=selected_ids)
+        )
+        correct_ids = {choice.id for choice in correct_choices}
+        selected_question_ids = {choice.id for choice in selected_choices}
+        is_correct = bool(correct_ids) and correct_ids == selected_question_ids
+
+        total_grade += question.grade
+        if is_correct:
+            score += question.grade
+
+        question_results.append({
+            "question": question,
+            "selected_choices": selected_choices,
+            "correct_choices": correct_choices,
+            "is_correct": is_correct,
+        })
+
+    grade = round(score * 100 / total_grade) if total_grade else 0
+    context = {
+        "course": course,
+        "submission": submission,
+        "grade": grade,
+        "score": score,
+        "total_grade": total_grade,
+        "question_results": question_results,
+    }
+    return render(
+        request, "onlinecourse/exam_result_bootstrap.html", context
+    )
