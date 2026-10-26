@@ -211,7 +211,7 @@ def show_exam_result(request, course_id, submission_id):
     selected_ids = set(submission.choices.values_list("id", flat=True))
     question_results = []
     score = 0
-    total_grade = 0
+    possible = 0
 
     for question in course.question_set.all():
         correct_choices = list(
@@ -224,7 +224,7 @@ def show_exam_result(request, course_id, submission_id):
         selected_question_ids = {choice.id for choice in selected_choices}
         is_correct = question.is_get_score(selected_ids) and correct_ids == selected_question_ids
 
-        total_grade += question.grade
+        possible += question.grade
         if is_correct:
             score += question.grade
 
@@ -235,14 +235,15 @@ def show_exam_result(request, course_id, submission_id):
             "is_correct": is_correct,
         })
 
-    grade = round(score * 100 / total_grade) if total_grade else 0
+    grade = round(score * 100 / possible) if possible else 0
     context = {
         "course": course,
         "submission": submission,
         "selected_ids": selected_ids,
         "grade": grade,
         "score": score,
-        "total_grade": total_grade,
+        "possible": possible,
+        "total_grade": possible,
         "question_results": question_results,
     }
     return render(
